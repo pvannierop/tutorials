@@ -1,6 +1,6 @@
-package org.baeldung.config;
+package org.baeldung.security.controller;
 
-import org.baeldung.security.OpenIdConnectUserDetails;
+import org.baeldung.security.user.OpenIdConnectUserDetails;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.core.Authentication;

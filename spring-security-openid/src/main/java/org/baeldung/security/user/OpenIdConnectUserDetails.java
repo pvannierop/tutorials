@@ -1,4 +1,4 @@
-package org.baeldung.security;
+package org.baeldung.security.user;
 
 import java.util.ArrayList;
 import java.util.Collection;
