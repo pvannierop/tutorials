@@ -36,9 +36,9 @@ public class GoogleOpenIdConnectConfig {
         details.setClientSecret(clientSecret);
         details.setAccessTokenUri(accessTokenUri);
         details.setUserAuthorizationUri(userAuthorizationUri);
-        details.setScope(Arrays.asList("openid", "email"));
+        details.setScope(Arrays.asList("offline_access"));
         details.setPreEstablishedRedirectUri(redirectUri);
-        details.setUseCurrentUri(false);
+        details.setUseCurrentUri(true);
         return details;
     }
 
