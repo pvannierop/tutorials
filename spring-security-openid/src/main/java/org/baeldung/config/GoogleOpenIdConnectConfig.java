@@ -14,6 +14,7 @@ import org.springframework.security.oauth2.config.annotation.web.configuration.E
 @Configuration
 @EnableOAuth2Client
 public class GoogleOpenIdConnectConfig {
+    
     @Value("${google.clientId}")
     private String clientId;
 
@@ -30,7 +31,7 @@ public class GoogleOpenIdConnectConfig {
     private String redirectUri;
 
     @Bean
-    public OAuth2ProtectedResourceDetails googleOpenId() {
+    public OAuth2ProtectedResourceDetails cBioPortalOIDC() {
         final AuthorizationCodeResourceDetails details = new AuthorizationCodeResourceDetails();
         details.setClientId(clientId);
         details.setClientSecret(clientSecret);
@@ -43,8 +44,8 @@ public class GoogleOpenIdConnectConfig {
     }
 
     @Bean
-    public OAuth2RestTemplate googleOpenIdTemplate(final OAuth2ClientContext clientContext) {
-        final OAuth2RestTemplate template = new OAuth2RestTemplate(googleOpenId(), clientContext);
+    public OAuth2RestTemplate openIdTemplate(final OAuth2ClientContext clientContext) {
+        final OAuth2RestTemplate template = new OAuth2RestTemplate(cBioPortalOIDC(), clientContext);
         return template;
     }
 
