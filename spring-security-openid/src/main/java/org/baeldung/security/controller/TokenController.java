@@ -17,7 +17,7 @@ public class TokenController {
 
     @RequestMapping("/token")
     @ResponseBody
-    public final String closed() {
+    public final String token() {
         final Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         final OpenIdConnectUserDetails user = (OpenIdConnectUserDetails) authentication.getPrincipal();
         final OAuth2AccessToken accessToken = user.getToken();
