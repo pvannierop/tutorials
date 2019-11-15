@@ -10,7 +10,7 @@ public class ClosedController {
     @RequestMapping("/closed")
     @ResponseBody
     public final String closed() {
-        return "Welcome to closed";
+        return "Welcome: to Closed!!!!!!!!";
     }
 
 }

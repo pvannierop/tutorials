@@ -6,7 +6,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.baeldung.security.user.OpenIdConnectUserDetails;
+import org.baeldung.security.oauth2.OpenIdConnectUserDetails;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -54,8 +54,8 @@ public class OpenIdConnectFilter extends AbstractAuthenticationProcessingFilter 
 
     }
 
-    public void setRestTemplate(OAuth2RestTemplate restTemplate2) {
-        restTemplate = restTemplate2;
+    public void setRestTemplate(OAuth2RestTemplate restTemplate) {
+        this.restTemplate = restTemplate;
     }
 
     private static class NoopAuthenticationManager implements AuthenticationManager {

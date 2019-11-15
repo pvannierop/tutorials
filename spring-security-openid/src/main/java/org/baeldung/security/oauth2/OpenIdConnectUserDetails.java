@@ -1,4 +1,4 @@
-package org.baeldung.security.user;
+package org.baeldung.security.oauth2;
 
 import java.util.ArrayList;
 import java.util.Collection;
