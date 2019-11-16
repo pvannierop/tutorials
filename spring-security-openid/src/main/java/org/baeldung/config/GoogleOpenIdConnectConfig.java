@@ -31,7 +31,7 @@ public class GoogleOpenIdConnectConfig {
     private String redirectUri;
 
     @Bean
-    public OAuth2ProtectedResourceDetails cBioPortalOIDC() {
+    public OAuth2ProtectedResourceDetails resourceDetails() {
         final AuthorizationCodeResourceDetails details = new AuthorizationCodeResourceDetails();
         details.setClientId(clientId);
         details.setClientSecret(clientSecret);
@@ -44,8 +44,8 @@ public class GoogleOpenIdConnectConfig {
     }
 
     @Bean
-    public OAuth2RestTemplate openIdTemplate(final OAuth2ClientContext clientContext) {
-        final OAuth2RestTemplate template = new OAuth2RestTemplate(cBioPortalOIDC(), clientContext);
+    public OAuth2RestTemplate restTemplate(final OAuth2ClientContext clientContext) {
+        final OAuth2RestTemplate template = new OAuth2RestTemplate(resourceDetails(), clientContext);
         return template;
     }
 

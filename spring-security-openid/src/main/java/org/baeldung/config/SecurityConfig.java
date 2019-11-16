@@ -1,14 +1,14 @@
 package org.baeldung.config;
 
+import javax.annotation.Resource;
+
 import org.baeldung.security.entrypoint.RestAuthenticationEntryPoint;
 import org.baeldung.security.filter.OAuthTokenFilter;
 import org.baeldung.security.filter.OpenIdConnectFilter;
-import org.baeldung.security.oauth2.OAuthTokenAuthenticationProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
-import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
@@ -25,7 +25,7 @@ public class SecurityConfig {
     @Order(100)
     public static class OAuth2TokenConfiguration extends WebSecurityConfigurerAdapter {
 
-        @Autowired
+        @Resource
         private OAuth2RestTemplate restTemplate;
 
         @Bean
@@ -53,25 +53,14 @@ public class SecurityConfig {
     }
 
     @Configuration
-    @Order(101)
+    @Order(99)
     public static class ApiConfiguration extends WebSecurityConfigurerAdapter {
 
         @Autowired
         RestAuthenticationEntryPoint restAuthenticationEntryPoint;
 
         @Autowired
-        OAuthTokenAuthenticationProvider authProvider;
-
-        @Bean
-        @Override
-        public AuthenticationManager authenticationManagerBean() throws Exception {
-            return super.authenticationManagerBean();
-        }
-
-        @Bean
-        public OAuthTokenFilter oAuthTokenFilter() {
-            return new OAuthTokenFilter();
-        }
+        OAuthTokenFilter filter;
 
         @Override
         protected void configure(HttpSecurity http) throws Exception {
@@ -80,7 +69,7 @@ public class SecurityConfig {
                     .csrf().disable()
                     .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                     .and()
-                    .addFilterAfter(oAuthTokenFilter(), AbstractPreAuthenticatedProcessingFilter.class)
+                    .addFilterAfter(filter, AbstractPreAuthenticatedProcessingFilter.class)
                     .authorizeRequests()
                         .antMatchers("/closed").authenticated();
         }
