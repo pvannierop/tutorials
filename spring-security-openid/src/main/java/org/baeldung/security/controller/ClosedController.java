@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 @Controller
 public class ClosedController {
-    
+
     @RequestMapping("/closed")
     @ResponseBody
     public final String closed() {

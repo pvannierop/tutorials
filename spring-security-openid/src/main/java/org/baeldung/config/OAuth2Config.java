@@ -2,6 +2,7 @@ package org.baeldung.config;
 
 import java.util.Arrays;
 
+import org.baeldung.security.oauth2.TokenRefreshRestTemplate;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -13,21 +14,21 @@ import org.springframework.security.oauth2.config.annotation.web.configuration.E
 
 @Configuration
 @EnableOAuth2Client
-public class GoogleOpenIdConnectConfig {
-    
-    @Value("${google.clientId}")
+public class OAuth2Config {
+
+    @Value("${oidc.clientId}")
     private String clientId;
 
-    @Value("${google.clientSecret}")
+    @Value("${oidc.clientSecret}")
     private String clientSecret;
 
-    @Value("${google.accessTokenUri}")
+    @Value("${oidc.accessTokenUri}")
     private String accessTokenUri;
 
-    @Value("${google.userAuthorizationUri}")
+    @Value("${oidc.userAuthorizationUri}")
     private String userAuthorizationUri;
 
-    @Value("${google.redirectUri}")
+    @Value("${oidc.redirectUri}")
     private String redirectUri;
 
     @Bean
@@ -46,6 +47,12 @@ public class GoogleOpenIdConnectConfig {
     @Bean
     public OAuth2RestTemplate restTemplate(final OAuth2ClientContext clientContext) {
         final OAuth2RestTemplate template = new OAuth2RestTemplate(resourceDetails(), clientContext);
+        return template;
+    }
+
+    @Bean
+    public TokenRefreshRestTemplate refreshTokenRestTemplate() {
+        final TokenRefreshRestTemplate template = new TokenRefreshRestTemplate(resourceDetails());
         return template;
     }
 

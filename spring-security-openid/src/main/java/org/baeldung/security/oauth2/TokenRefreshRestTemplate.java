@@ -17,13 +17,13 @@ import org.springframework.web.client.RestTemplate;
 
 
 @Component
-public class MyRestTemplate extends RestTemplate {
+public class TokenRefreshRestTemplate extends RestTemplate {
 
     private final Logger logger = LoggerFactory.getLogger(getClass());
 
     OAuth2ProtectedResourceDetails resourceDetails;
 
-    public MyRestTemplate(OAuth2ProtectedResourceDetails tokenRefreshResourceDetails) {
+    public TokenRefreshRestTemplate(OAuth2ProtectedResourceDetails tokenRefreshResourceDetails) {
         resourceDetails = tokenRefreshResourceDetails;
     }
 
@@ -48,7 +48,7 @@ public class MyRestTemplate extends RestTemplate {
         if (matcher.find()) {
             accessToken = matcher.group(1);
             logger.debug("Received response from token endpoint:\n" + accessToken);
-        }   
+        }
         return accessToken;
     }
 

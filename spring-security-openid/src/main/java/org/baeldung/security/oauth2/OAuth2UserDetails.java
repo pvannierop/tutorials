@@ -8,14 +8,14 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 
-public class OpenIdConnectUserDetails implements UserDetails {
+public class OAuth2UserDetails implements UserDetails {
 
     private static final long serialVersionUID = 1L;
 
     private OAuth2AccessToken token;
     private List<GrantedAuthority> authorities = new ArrayList<GrantedAuthority>();
 
-    public OpenIdConnectUserDetails(OAuth2AccessToken token) {
+    public OAuth2UserDetails(OAuth2AccessToken token) {
         this.token = token;
     }
 

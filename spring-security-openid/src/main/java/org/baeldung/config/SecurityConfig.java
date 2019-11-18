@@ -2,13 +2,12 @@ package org.baeldung.config;
 
 import javax.annotation.Resource;
 
-import org.baeldung.security.entrypoint.RestAuthenticationEntryPoint;
-import org.baeldung.security.filter.OAuthTokenFilter;
-import org.baeldung.security.filter.OpenIdConnectFilter;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.baeldung.security.filter.OAuth2TokenAccessFilter;
+import org.baeldung.security.filter.OAuth2TokenRetrievalFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
@@ -18,6 +17,7 @@ import org.springframework.security.oauth2.client.filter.OAuth2ClientContextFilt
 import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
 import org.springframework.security.web.authentication.preauth.AbstractPreAuthenticatedProcessingFilter;
 
+@Configuration
 @EnableWebSecurity
 public class SecurityConfig {
 
@@ -29,8 +29,8 @@ public class SecurityConfig {
         private OAuth2RestTemplate restTemplate;
 
         @Bean
-        public OpenIdConnectFilter myFilter() {
-            final OpenIdConnectFilter filter = new OpenIdConnectFilter("/login");
+        public OAuth2TokenRetrievalFilter tokenRetrievalFilter() {
+            final OAuth2TokenRetrievalFilter filter = new OAuth2TokenRetrievalFilter("/login");
             filter.setRestTemplate(restTemplate);
             return filter;
         }
@@ -38,16 +38,16 @@ public class SecurityConfig {
         @Override
         protected void configure(HttpSecurity http) throws Exception {
             http
+                .antMatcher("/token")
                 .addFilterAfter(new OAuth2ClientContextFilter(), AbstractPreAuthenticatedProcessingFilter.class)
-                .addFilterAfter(myFilter(), OAuth2ClientContextFilter.class)
-                .httpBasic()
-                .authenticationEntryPoint(new LoginUrlAuthenticationEntryPoint("/login"))
+                .addFilterAfter(tokenRetrievalFilter(), OAuth2ClientContextFilter.class)
+                .httpBasic().authenticationEntryPoint(new LoginUrlAuthenticationEntryPoint("/login"))
                 .and()
                 .authorizeRequests()
-                    .antMatchers("/token").authenticated()
-                .and()
-                .authorizeRequests()
-                    .antMatchers("/**").permitAll();
+                    .antMatchers("/token").authenticated();
+                    // .antMatchers("/**").permitAll();
+                    // .antMatchers(".closed").authenticated();
+            ;
         }
 
     }
@@ -56,22 +56,37 @@ public class SecurityConfig {
     @Order(99)
     public static class ApiConfiguration extends WebSecurityConfigurerAdapter {
 
-        @Autowired
-        RestAuthenticationEntryPoint restAuthenticationEntryPoint;
+        // @Autowired
+        // OAuth2TokenAccessFilter filter;
 
-        @Autowired
-        OAuthTokenFilter filter;
+        @Bean
+        public OAuth2TokenAccessFilter tokenAccessFilter() {
+            final OAuth2TokenAccessFilter filter = new OAuth2TokenAccessFilter("/closed");
+            return filter;
+        }
+
+        @Bean
+        @Override
+        public AuthenticationManager authenticationManagerBean() throws Exception {
+            return super.authenticationManagerBean();
+        }
 
         @Override
         protected void configure(HttpSecurity http) throws Exception {
-            http.antMatcher("/closed")
-                    .anonymous().disable()
-                    .csrf().disable()
-                    .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-                    .and()
-                    .addFilterAfter(filter, AbstractPreAuthenticatedProcessingFilter.class)
-                    .authorizeRequests()
-                        .antMatchers("/closed").authenticated();
+            // http.antMatcher("/closed").authorizeRequests() //
+            //     .anyRequest().authenticated(); //
+            //     // .and()
+            //     // .addFilterBefore(filter, AbstractPreAuthenticatedProcessingFilter.class);
+            http
+                .antMatcher("/closed")
+                .anonymous().disable()
+                .csrf().disable()
+                .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                .and()
+                .addFilterAfter(tokenAccessFilter(), AbstractPreAuthenticatedProcessingFilter.class)
+                .authorizeRequests()
+                    // .anyRequest().hasAuthority("study_es_0");
+                    .antMatchers("/closed").hasAuthority("study_es_0");
         }
 
     }

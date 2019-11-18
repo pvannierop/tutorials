@@ -6,38 +6,39 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.baeldung.security.oauth2.OpenIdConnectUserDetails;
+import org.baeldung.security.oauth2.OAuth2UserDetails;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.oauth2.client.OAuth2RestOperations;
 import org.springframework.security.oauth2.client.OAuth2RestTemplate;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.common.exceptions.OAuth2Exception;
 import org.springframework.security.web.authentication.AbstractAuthenticationProcessingFilter;
 
-public class OpenIdConnectFilter extends AbstractAuthenticationProcessingFilter {
-    @Value("${google.clientId}")
+public class OAuth2TokenRetrievalFilter extends AbstractAuthenticationProcessingFilter {
+
+    @Value("${oidc.clientId}")
     private String clientId;
 
-    @Value("${google.issuer}")
+    @Value("${oidc.issuer}")
     private String issuer;
 
-    @Value("${google.jwkUrl}")
+    @Value("${oidc.jwkUrl}")
     private String jwkUrl;
 
-    public OAuth2RestOperations restTemplate;
+    private OAuth2RestTemplate restTemplate;
 
-    public OpenIdConnectFilter(String defaultFilterProcessesUrl) {
+    public OAuth2TokenRetrievalFilter(String defaultFilterProcessesUrl) {
         super(defaultFilterProcessesUrl);
         setAuthenticationManager(new NoopAuthenticationManager());
     }
 
     @Override
-    public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws AuthenticationException, IOException, ServletException {
+    public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response)
+            throws AuthenticationException, IOException, ServletException {
 
         OAuth2AccessToken accessToken;
         try {
@@ -46,7 +47,7 @@ public class OpenIdConnectFilter extends AbstractAuthenticationProcessingFilter 
             throw new BadCredentialsException("Could not obtain access token", e);
         }
         try {
-            final OpenIdConnectUserDetails user = new OpenIdConnectUserDetails(accessToken);
+            final OAuth2UserDetails user = new OAuth2UserDetails(accessToken);
             return new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities());
         } catch (final Exception e) {
             throw new BadCredentialsException("Could not obtain user details from token", e);
