@@ -29,7 +29,7 @@ public class SecurityConfig {
 
         @Bean
         public OAuth2TokenRetrievalFilter tokenRetrievalFilter() {
-            final OAuth2TokenRetrievalFilter filter = new OAuth2TokenRetrievalFilter("/login");
+            final OAuth2TokenRetrievalFilter filter = new OAuth2TokenRetrievalFilter("/token/login");
             filter.setRestTemplate(restTemplate);
             return filter;
         }
@@ -37,14 +37,17 @@ public class SecurityConfig {
         @Override
         protected void configure(HttpSecurity http) throws Exception {
             http
-                .antMatcher("/token")
+                .antMatcher("/token/**")
                 .addFilterAfter(new OAuth2ClientContextFilter(), AbstractPreAuthenticatedProcessingFilter.class)
                 .addFilterAfter(tokenRetrievalFilter(), OAuth2ClientContextFilter.class)
-                .httpBasic().authenticationEntryPoint(new LoginUrlAuthenticationEntryPoint("/login"))
+                .httpBasic().authenticationEntryPoint(new LoginUrlAuthenticationEntryPoint("/token/login"))
                 .and()
                 .authorizeRequests()
                     // .anyRequest().fullyAuthenticated()
-                    .antMatchers("/token").authenticated()
+                    .antMatchers("/token").fullyAuthenticated()
+                .and()
+                .authorizeRequests()
+                    .antMatchers("/token/login").permitAll();
             ;
         }
 
