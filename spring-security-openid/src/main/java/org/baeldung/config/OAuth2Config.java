@@ -16,19 +16,19 @@ import org.springframework.security.oauth2.config.annotation.web.configuration.E
 @EnableOAuth2Client
 public class OAuth2Config {
 
-    @Value("${oidc.clientId}")
+    @Value("${dat.oauth2.clientId}")
     private String clientId;
 
-    @Value("${oidc.clientSecret}")
+    @Value("${dat.oauth2.clientSecret}")
     private String clientSecret;
 
-    @Value("${oidc.accessTokenUri}")
+    @Value("${dat.oauth2.accessTokenUri}")
     private String accessTokenUri;
 
-    @Value("${oidc.userAuthorizationUri}")
+    @Value("${dat.oauth2.userAuthorizationUri}")
     private String userAuthorizationUri;
 
-    @Value("${oidc.redirectUri}")
+    @Value("${dat.oauth2.redirectUri}")
     private String redirectUri;
 
     @Bean

@@ -36,30 +36,39 @@ import org.springframework.security.jwt.Jwt;
 import org.springframework.security.jwt.JwtHelper;
 import org.springframework.security.jwt.crypto.sign.RsaVerifier;
 import org.springframework.security.web.authentication.AbstractAuthenticationProcessingFilter;
+import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
+import org.springframework.security.web.authentication.SavedRequestAwareAuthenticationSuccessHandler;
 import org.springframework.util.StringUtils;
 
 public class OAuth2TokenAccessFilter extends AbstractAuthenticationProcessingFilter {
 
-    public OAuth2TokenAccessFilter(String defaultFilterProcessesUrl) {
-        super(defaultFilterProcessesUrl);
-    }
-
     private final Logger logger = LoggerFactory.getLogger(getClass());
 
-    @Value("${oidc.jwkUrl}")
+    @Value("${dat.oauth2.jwkUrl}")
     private String jwkUrl;
+
+    @Value("${dat.oauth2.issuer}")
+    private String issuer;
+
+    @Value("${dat.oauth2.clientId}")
+    private String clientId;
 
     @Autowired
     TokenRefreshRestTemplate tokenRefreshRestTemplate;
 
+    public OAuth2TokenAccessFilter(final String defaultFilterProcessesUrl) {
+        super(defaultFilterProcessesUrl);
+        setAuthenticationSuccessHandler(customRedirectHandler());
+    }
+
     @Override
     @Autowired
-    public void setAuthenticationManager(AuthenticationManager authenticationManager) {
+    public void setAuthenticationManager(final AuthenticationManager authenticationManager) {
         super.setAuthenticationManager(authenticationManager);
     }
 
     @Override
-    public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response)
+    public Authentication attemptAuthentication(final HttpServletRequest request, final HttpServletResponse response)
             throws AuthenticationException, IOException, ServletException {
 
         // get the offline token provided by the user (script)
@@ -85,7 +94,11 @@ public class OAuth2TokenAccessFilter extends AbstractAuthenticationProcessingFil
 
             // get claims from token
             final String claims = tokenDecoded.getClaims();
-            JsonNode claimsMap = new ObjectMapper().readTree(claims);
+            final JsonNode claimsMap = new ObjectMapper().readTree(claims);
+
+            hasValidIssuer(claimsMap);
+            hasValidClientId(claimsMap);
+
             userName = extractUserName(claimsMap);
             authorities = extractAuthorities(claimsMap);
 
@@ -103,18 +116,45 @@ public class OAuth2TokenAccessFilter extends AbstractAuthenticationProcessingFil
         return new UsernamePasswordAuthenticationToken(userName, "", authorities);
     }
 
-    private Set<GrantedAuthority> extractAuthorities(JsonNode claimsMap) {
+    private AuthenticationSuccessHandler customRedirectHandler() {
+        return new SavedRequestAwareAuthenticationSuccessHandler() {
+            @Override
+            protected String determineTargetUrl(final HttpServletRequest request, final HttpServletResponse response) {
+                return request.getServletPath();
+            }
+
+            @Override
+            public void onAuthenticationSuccess(final HttpServletRequest request, final HttpServletResponse response, final Authentication authentication) throws ServletException, IOException {
+                request.getRequestDispatcher(request.getServletPath()).forward(request, response);
+            }
+        };
+    }
+
+    private Set<GrantedAuthority> extractAuthorities(final JsonNode claimsMap) {
         Set<GrantedAuthority> authorities;
-        Iterable<JsonNode> roles = () -> claimsMap.get("resource_access").get("cbioportal").get("roles").getElements();
+        final Iterable<JsonNode> roles = () -> claimsMap.get("resource_access").get("cbioportal").get("roles")
+                .getElements();
         authorities = StreamSupport.stream(roles.spliterator(), false).map(role -> role.toString().replaceAll("\"", ""))
                 .map(role -> new SimpleGrantedAuthority(role)).collect(Collectors.toSet());
         return authorities;
     }
 
-    private String extractUserName(JsonNode claimsMap) {
+    private String extractUserName(final JsonNode claimsMap) {
         String userName;
         userName = claimsMap.get("user_name").asText();
         return userName;
+    }
+
+    private void hasValidIssuer(final JsonNode claimsMap) throws BadCredentialsException {
+        if (! claimsMap.get("iss").asText().equals(issuer)) {
+            throw new BadCredentialsException("Wrong Issuer found in token");
+        }
+    }
+
+    private void hasValidClientId(final JsonNode claimsMap) throws BadCredentialsException {
+        if (! claimsMap.get("aud").asText().equals(clientId)) {
+            throw new BadCredentialsException("Wrong clientId found in token");
+        }
     }
 
     protected String extractHeaderToken(final ServletRequest request) {

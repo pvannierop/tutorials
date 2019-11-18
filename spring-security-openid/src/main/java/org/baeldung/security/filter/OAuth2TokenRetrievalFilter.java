@@ -20,13 +20,10 @@ import org.springframework.security.web.authentication.AbstractAuthenticationPro
 
 public class OAuth2TokenRetrievalFilter extends AbstractAuthenticationProcessingFilter {
 
-    @Value("${oidc.clientId}")
+    @Value("${dat.oauth2.clientId}")
     private String clientId;
 
-    @Value("${oidc.issuer}")
-    private String issuer;
-
-    @Value("${oidc.jwkUrl}")
+    @Value("${dat.oauth2.jwkUrl}")
     private String jwkUrl;
 
     private OAuth2RestTemplate restTemplate;

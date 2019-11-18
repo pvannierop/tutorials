@@ -43,7 +43,6 @@ public class SecurityConfig {
                 .httpBasic().authenticationEntryPoint(new LoginUrlAuthenticationEntryPoint("/token/login"))
                 .and()
                 .authorizeRequests()
-                    // .anyRequest().fullyAuthenticated()
                     .antMatchers("/token").fullyAuthenticated()
                 .and()
                 .authorizeRequests()
@@ -58,15 +57,14 @@ public class SecurityConfig {
     public static class ApiConfiguration extends WebSecurityConfigurerAdapter {
 
         @Bean
-        public OAuth2TokenAccessFilter tokenAccessFilter() {
-            final OAuth2TokenAccessFilter filter = new OAuth2TokenAccessFilter("/closed");
-            return filter;
-        }
-
-        @Bean
         @Override
         public AuthenticationManager authenticationManagerBean() throws Exception {
             return super.authenticationManagerBean();
+        }
+
+        @Bean
+        public OAuth2TokenAccessFilter tokenAccessFilter() {
+            return new OAuth2TokenAccessFilter("/closed");
         }
 
         @Override
@@ -79,8 +77,7 @@ public class SecurityConfig {
                 .and()
                 .addFilterAfter(tokenAccessFilter(), AbstractPreAuthenticatedProcessingFilter.class)
                 .authorizeRequests()
-                    // .anyRequest().hasAuthority("study_es_0")
-                    .antMatchers("/closed").hasAuthority("study_es_0")
+                    .anyRequest().hasAuthority("study_es_0")
             ;
         }
 
