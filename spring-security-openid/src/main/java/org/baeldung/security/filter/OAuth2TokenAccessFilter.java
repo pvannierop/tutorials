@@ -28,7 +28,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-// import org.springframework.security.core.Authentication;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.GrantedAuthority;
@@ -101,11 +100,7 @@ public class OAuth2TokenAccessFilter extends AbstractAuthenticationProcessingFil
             throw e;
         }
 
-        // authenticate the user based on validate token
-        // final Authentication authReq = new UsernamePasswordAuthenticationToken(userName, "", authorities);
-        // SecurityContextHolder.getContext().setAuthentication(authReq);
         return new UsernamePasswordAuthenticationToken(userName, "", authorities);
-
     }
 
     private Set<GrantedAuthority> extractAuthorities(JsonNode claimsMap) {
